@@ -284,3 +284,72 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Built with FastAPI, PostgreSQL, Redis, and AI services for modern job application automation.**
+
+---
+
+## ⚡ Windows Quick Start (No Docker)
+
+If you just installed PostgreSQL locally and want the fastest path to a running server + landing page:
+
+### 1. PostgreSQL
+Create a database and user (example):
+```sql
+CREATE DATABASE applybot;
+CREATE USER applybot_user WITH PASSWORD 'applybot_pass';
+GRANT ALL PRIVILEGES ON DATABASE applybot TO applybot_user;
+```
+
+### 2. One-Command Setup & Run
+From the `ApplyBot` directory (or project root using npm script):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup_local.ps1
+# or from root (package.json):
+npm run backend:setup-run
+```
+This will:
+1. Create `.env` if missing
+2. Create & activate `.venv`
+3. Install dependencies
+4. Sanity check DB port
+5. Start the FastAPI server on `http://localhost:8000`
+
+### 3. Static Landing Page (Optional)
+Run the standalone static site (does not require Python once built):
+```powershell
+npm run serve:static
+# open http://localhost:5173/
+```
+If the backend (port 8000) is also running, the static page will show live version + health.
+
+### 4. Verify
+| What | URL |
+|------|-----|
+| Landing (FastAPI) | http://localhost:8000/ |
+| Swagger Docs | http://localhost:8000/docs |
+| ReDoc | http://localhost:8000/redoc |
+| Health | http://localhost:8000/health |
+| Static Variant | http://localhost:5173/ |
+
+### 5. Environment Variables
+Created automatically if absent. Adjust `DATABASE_URL` in `.env` as needed:
+```
+DATABASE_URL=postgresql://applybot_user:applybot_pass@localhost:5432/applybot
+```
+
+### 6. Common Issues
+| Issue | Fix |
+|-------|-----|
+| ValueError: DATABASE_URL required | Ensure `.env` created; re-run script |
+| Cannot connect to Postgres | Confirm service running; correct port/credentials |
+| LaTeX errors | Install MiKTeX or rely on ReportLab fallback |
+| loguru not found | Virtual environment not activated; re-run script |
+
+### 7. Clean Up
+```powershell
+deactivate
+Remove-Item .venv -Recurse -Force
+# Optional: drop database
+psql -U postgres -c "DROP DATABASE applybot;"
+```
+
+---

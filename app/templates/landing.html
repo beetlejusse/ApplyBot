@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApplyBot – AI Job Application Automation</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <meta name="description" content="AI-powered system that fetches jobs, matches projects, and generates tailored resumes & cover letters." />
+</head>
+<body>
+  <header class="hero">
+    <div class="container">
+      <div class="top-bar">
+  <h1>ApplyBot <span style="font-size:.55em; font-weight:600; vertical-align:middle; letter-spacing:0; color:var(--muted);">v{{ version }}</span></h1>
+        <div class="top-actions">
+          <button id="themeToggle" class="btn small" aria-label="Toggle color theme">🌙</button>
+        </div>
+      </div>
+      <p class="subtitle">AI-powered automation for job discovery, project matching, resume & cover letter generation.</p>
+      <div class="cta-group">
+        <a href="/docs" class="btn primary">API Docs</a>
+        <a href="/redoc" class="btn">ReDoc</a>
+  <a href="https://github.com/Kcodess2807/ApplyBot" target="_blank" rel="noopener" class="btn ghost">GitHub</a>
+      </div>
+      <div class="status-row">
+        <span id="uptimeBadge" class="badge badge-loading" title="Service status">Checking...</span>
+        <span id="uptimePercent" class="badge" style="margin-left:.5rem; display:none;" title="Rolling uptime (last 24h polls)">--%</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <section>
+      <h2>What is ApplyBot?</h2>
+      <p>ApplyBot is a production-ready backend that automates the job application workflow. It aggregates jobs from multiple sources, intelligently matches your projects to job descriptions using ML, and generates customized resumes and AI-enhanced cover letters.</p>
+    </section>
+
+    <section>
+      <h2>Key Features</h2>
+      <div class="features-grid">
+        <div class="feature">
+          <h3>Multi-Source Job Fetching</h3>
+          <p>Integrates with RemoteOK, GitHub, Reed, and Adzuna with smart deduplication.</p>
+        </div>
+        <div class="feature">
+          <h3>ML Project Matching</h3>
+          <p>TF-IDF + keyword + technology alignment for ranked project relevance.</p>
+        </div>
+        <div class="feature">
+          <h3>Dynamic Resume Generation</h3>
+          <p>LaTeX quality output with ReportLab fallback for environments without TeX.</p>
+        </div>
+        <div class="feature">
+          <h3>AI Cover Letters</h3>
+          <p>Groq (primary) & OpenAI (fallback) with template fallback path.</p>
+        </div>
+        <div class="feature">
+          <h3>RESTful API</h3>
+          <p>Clean versioned endpoints under <code>/api/v1</code> with OpenAPI docs.</p>
+        </div>
+        <div class="feature">
+          <h3>Production Focus</h3>
+          <p>Structured logging, environment config, and deployment guidance.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Get Started</h2>
+      <ol class="getting-started">
+        <li>Clone the repository</li>
+        <li>Configure <code>.env</code> with database + API keys</li>
+        <li>Run migrations / init DB</li>
+        <li>Start the server and explore <a href="/docs">/docs</a></li>
+      </ol>
+      <pre class="code-block">git clone &lt;repo-url&gt;
+cd applybot
+pip install -r requirements.txt
+alembic upgrade head
+python start_server_fixed.py</pre>
+    </section>
+
+    <section>
+      <h2>Useful Links</h2>
+      <ul class="links">
+        <li><a href="/docs">Interactive API Docs (Swagger)</a></li>
+        <li><a href="/redoc">ReDoc API Reference</a></li>
+        <li><a href="/api/v1/health">Health Check</a></li>
+  <li><a href="https://github.com/Kcodess2807/ApplyBot" target="_blank" rel="noopener">GitHub Repository</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>© <span id="year"></span> ApplyBot • Built with FastAPI, PostgreSQL, Redis & AI Services</p>
+    </div>
+  </footer>
+
+  <script>
+    // Year footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Theme toggle with persistence
+    const root = document.documentElement;
+    const toggleBtn = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('applybot-theme');
+    if (storedTheme) root.setAttribute('data-theme', storedTheme);
+    updateToggleIcon();
+    toggleBtn.addEventListener('click', () => {
+      const current = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', current);
+      localStorage.setItem('applybot-theme', current);
+      updateToggleIcon();
+    });
+    function updateToggleIcon(){
+      const mode = root.getAttribute('data-theme') || 'dark';
+      toggleBtn.textContent = mode === 'dark' ? '🌙' : '☀️';
+    }
+
+    // Uptime / health polling
+    const badge = document.getElementById('uptimeBadge');
+    const uptimeBadge = document.getElementById('uptimePercent');
+    const POLL_KEY = 'applybot-health-polls';
+    const WINDOW_HOURS = 24; // rolling window
+    const INTERVAL_MS = 30000;
+
+    function loadPolls(){
+      try { return JSON.parse(localStorage.getItem(POLL_KEY) || '[]'); } catch { return []; }
+    }
+    function savePolls(polls){ localStorage.setItem(POLL_KEY, JSON.stringify(polls)); }
+
+    function prunePolls(polls){
+      const cutoff = Date.now() - WINDOW_HOURS*60*60*1000;
+      return polls.filter(p => p.t >= cutoff);
+    }
+
+    function updateUptimeDisplay(polls){
+      if (!polls.length){ uptimeBadge.style.display='none'; return; }
+      const success = polls.filter(p => p.ok).length;
+      const pct = (success / polls.length) * 100;
+      uptimeBadge.style.display='inline-block';
+      uptimeBadge.textContent = pct.toFixed(1) + '%';
+      uptimeBadge.className = 'badge ' + (pct > 99 ? 'badge-ok' : pct > 95 ? 'badge-warn' : 'badge-error');
+    }
+
+    async function checkHealth(){
+      let polls = prunePolls(loadPolls());
+      let ok = false;
+      try {
+        const res = await fetch('/health', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Bad status');
+        const data = await res.json();
+        ok = data.status === 'healthy';
+        if (ok) { badge.textContent = 'Healthy'; badge.className = 'badge badge-ok'; }
+        else { badge.textContent = 'Degraded'; badge.className = 'badge badge-warn'; }
+      } catch(err){
+        badge.textContent = 'Down';
+        badge.className = 'badge badge-error';
+      }
+      polls.push({ t: Date.now(), ok });
+      polls = prunePolls(polls);
+      savePolls(polls);
+      updateUptimeDisplay(polls);
+    }
+
+    // Initial load
+    updateUptimeDisplay(prunePolls(loadPolls()));
+    checkHealth();
+    setInterval(checkHealth, INTERVAL_MS);
+  </script>
+</body>
+</html>
