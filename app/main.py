@@ -3,7 +3,10 @@ Main FastAPI application entry point with logging and middleware configuration.
 """
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 import sys
@@ -11,6 +14,9 @@ import sys
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1.api import api_router
+
+# Template & static setup
+templates = Jinja2Templates(directory="app/templates")
 
 
 @asynccontextmanager
@@ -65,6 +71,9 @@ def create_application() -> FastAPI:
     # Include API router
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
+    # Mount static files
+    app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
     return app
 
 
@@ -72,15 +81,29 @@ def create_application() -> FastAPI:
 app = create_application()
 
 
-@app.get("/")
-async def root():
-    """Root endpoint with basic system information."""
-    return {
+@app.get("/", response_class=HTMLResponse)
+async def landing_page(request: Request):
+    """Serve the landing page HTML."""
+    return templates.TemplateResponse(
+        "landing.html",
+        {
+            "request": request,
+            "project_name": settings.PROJECT_NAME,
+            "environment": settings.ENVIRONMENT,
+            "version": "1.0.0",
+        }
+    )
+
+@app.get("/api")
+async def api_root():
+    """JSON root information (moved from /)."""
+    return JSONResponse({
         "message": "Job Application System API",
         "version": "1.0.0",
         "status": "running",
-        "docs": "/docs"
-    }
+        "docs": "/docs",
+        "openapi": f"{settings.API_V1_STR}/openapi.json"
+    })
 
 
 @app.get("/health")
