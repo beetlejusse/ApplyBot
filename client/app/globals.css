@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b0311;
+  /* deep violet-black */
+  --foreground: #f2f2f2;
+  --primary: #a78bfa;
+  /* soft purple for accents */
+  --primary-strong: #8b5cf6;
+  --panel: #ffffff;
+  /* pill panel */
+  --panel-foreground: #0b0b0b;
+  --line: rgba(255, 255, 255, 0.18);
+  /* frame lines */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-strong);
+  --color-border: var(--line);
+  --font-sans: var(--font-jakarta);
+  --font-alt: var(--font-poppins);
+  --font-serif: var(--font-instrument-serif);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Purple cinematic background */
+body {
+  background:
+    radial-gradient(900px 700px at 25% 15%, rgba(121, 40, 202, 0.35), transparent 60%),
+    radial-gradient(900px 700px at 85% 50%, rgba(98, 25, 184, 0.40), transparent 60%),
+    radial-gradient(1200px 900px at 70% 90%, rgba(25, 1, 50, 0.9), transparent 60%),
+    linear-gradient(180deg, #1b082b 0%, #0b0311 70%);
+  color: var(--foreground);
+  font-family: var(--font-sans), var(--font-alt), Arial, Helvetica, sans-serif;
+}
+
+/* Font utility classes */
+.font-serif-title {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.font-alt {
+  font-family: var(--font-alt), var(--font-sans), sans-serif;
+}
+
+.font-sans {
+  font-family: var(--font-sans), var(--font-alt), sans-serif;
+}
+
+/* Subtle film grain overlay */
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: .45;
+}
+
+.grain-overlay::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image:
+    repeating-radial-gradient(circle at 20% 20%, rgba(255, 255, 255, .03) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .02) 0 2px, transparent 2px 4px);
+  filter: contrast(110%) brightness(100%);
+}
+
+/* Frame lines */
+.frame-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.frame-lines .v-left {
+  position: absolute;
+  left: 90px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.frame-lines .v-right {
+  position: absolute;
+  right: 90px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.frame-lines .h-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 24px;
+  height: 1px;
+  background: var(--line);
+}
+
+.frame-lines .h-bottom {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 120px;
+  height: 1px;
+  background: var(--line);
+}
+
+/* Glow utilities */
+.glow {
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.35);
+}
+
+.glow-lg {
+  box-shadow: 0 0 32px rgba(167, 139, 250, 0.45);
+}
+
+.glow-xl {
+  box-shadow: 0 0 56px rgba(167, 139, 250, 0.55);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #e9d5ff 0%, #a78bfa 60%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Animated float */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0)
+  }
+
+  50% {
+    transform: translateY(-10px)
+  }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Gradient border card */
+.gradient-border {
+  position: relative;
+  border-radius: 16px;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #c084fc, #7c3aed);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Pill bar */
+.pill {
+  background: var(--panel);
+  color: var(--panel-foreground);
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.pill-button {
+  background: #1f1f1f;
+  color: #f5f5f5;
+  border-radius: 999px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, .25);
+  /* double outline */
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .12);
+  cursor: pointer;
+}
+
+/* Enhanced navbar pill */
+.nav-pill {
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
+    radial-gradient(120% 140% at 0% 0%, rgba(167, 139, 250, .35), transparent 50%);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: #f6f3ff;
+  border-radius: 999px;
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, .35);
+}
+
+.nav-link {
+  color: #d9cdf0;
+  opacity: .9;
+  transition: color .2s, opacity .2s;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  opacity: 1;
+}
